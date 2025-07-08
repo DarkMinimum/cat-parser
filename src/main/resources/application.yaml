@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: cat-parser
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  cassandra:
+    schema-action: CREATE_IF_NOT_EXISTS
+    request:
+      timeout: 10s
+    connection:
+      connect-timeout: 10s
+      init-query-timeout: 10s
+    contact-points: localhost
+    port: 9042
+    keyspace-name: spring_cassandra
+    username: cassandra
+    password: cassandra
+    local-datacenter: datacenter1
+server:
+  servlet:
+    contextPath: /api-cat
+
+parallel-execution:
+  fork-join:
+    enabled: false
+    workload: 1000
+  executor-service:
+    enabled: false
+    pools: 10
+    virtual: true
+
+logging:
+  level:
+    org:
+      springframework:
+        aop:
+          interceptor:
+            PerformanceMonitorInterceptor: TRACE
