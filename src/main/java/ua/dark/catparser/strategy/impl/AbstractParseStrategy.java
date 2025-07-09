@@ -1,6 +1,5 @@
 package ua.dark.catparser.strategy.impl;
 
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import ua.dark.catparser.entity.Cat;
 import ua.dark.catparser.mapper.SimpleRowCatMapper;
@@ -23,8 +22,7 @@ public abstract class AbstractParseStrategy {
         List<Cat> catList = new ArrayList<>();
         int offset = startRow;
         while (offset < sheet.getLastRowNum() && offset < startRow + batchSize) {
-            Row row = sheet.getRow(offset);
-            catList.add(catMapper.rowToCat(row));
+            catList.add(catMapper.rowToCat(sheet.getRow(offset)));
             offset++;
         }
         catRepository.saveAll(catList);
