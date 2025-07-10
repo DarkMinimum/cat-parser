@@ -26,18 +26,20 @@ import java.util.concurrent.ForkJoinPool;
 public class AppConfiguration {
 
     @Value("#{new Integer('${parallel-execution.executor-service.pools}')}")
-    private Integer poolSize;
+    private Integer executorPools;
     @Value("#{new Boolean('${parallel-execution.executor-service.virtual}')}")
     private Boolean useVirtual;
+    @Value("#{new Integer('${parallel-execution.fork-join.pools}')}")
+    private Integer forkPools;
 
     @Bean
     public ExecutorService executorService() {
-        return useVirtual ? Executors.newVirtualThreadPerTaskExecutor() : Executors.newFixedThreadPool(poolSize);
+        return useVirtual ? Executors.newVirtualThreadPerTaskExecutor() : Executors.newFixedThreadPool(executorPools);
     }
 
     @Bean
     public ForkJoinPool forkJoinPool() {
-        return new ForkJoinPool(poolSize);
+        return new ForkJoinPool(forkPools);
     }
 
     @Bean

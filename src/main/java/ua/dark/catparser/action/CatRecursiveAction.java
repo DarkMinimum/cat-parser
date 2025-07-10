@@ -57,7 +57,7 @@ public class CatRecursiveAction extends RecursiveAction {
             catList.add(catMapper.rowToCat(row));
             offset++;
         }
-        catRepository.saveAll(catList);
+//        catRepository.saveAll(catList);
     }
 
 }

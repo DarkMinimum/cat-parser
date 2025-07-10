@@ -25,6 +25,6 @@ public abstract class AbstractParseStrategy {
             catList.add(catMapper.rowToCat(sheet.getRow(offset)));
             offset++;
         }
-        catRepository.saveAll(catList);
+//        catRepository.saveAll(catList);
     }
 }

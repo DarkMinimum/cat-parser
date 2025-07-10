@@ -32,11 +32,7 @@ public class ExecutionServiceStrategy extends AbstractParseStrategy implements P
         int batchSize = size / poolSize;
         for (int i = 0; i < poolSize; i++) {
             int startRow = i * batchSize;
-            if (useParallelExecution) {
-                executorService.submit(() -> processBatch(sheet, startRow, batchSize));
-            } else {
-                processBatch(sheet, startRow, batchSize);
-            }
+            executorService.submit(() -> processBatch(sheet, startRow, batchSize));
         }
     }
 

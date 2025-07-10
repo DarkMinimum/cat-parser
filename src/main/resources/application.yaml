@@ -25,9 +25,10 @@ server:
 parallel-execution:
   fork-join:
     enabled: false
-    workload: 1000
+    pools: 10
+    workload: 500
   executor-service:
-    enabled: false
+    enabled: true
     pools: 10
     virtual: true
 
