@@ -18,13 +18,13 @@ public abstract class AbstractParseStrategy {
         this.catMapper = catMapper;
     }
 
-    protected void processBatch(final Sheet sheet, int startRow, int batchSize) {
+    protected List<Cat> processBatch(final Sheet sheet, int startRow, int batchSize) {
         List<Cat> catList = new ArrayList<>();
         int offset = startRow;
         while (offset < sheet.getLastRowNum() && offset < startRow + batchSize) {
             catList.add(catMapper.rowToCat(sheet.getRow(offset)));
             offset++;
         }
-//        catRepository.saveAll(catList);
+        return catList;
     }
 }

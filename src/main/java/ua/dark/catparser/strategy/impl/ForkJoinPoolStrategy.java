@@ -5,10 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ua.dark.catparser.action.CatRecursiveAction;
+import ua.dark.catparser.entity.Cat;
 import ua.dark.catparser.mapper.SimpleRowCatMapper;
 import ua.dark.catparser.repo.CatRepository;
 import ua.dark.catparser.strategy.ParseStrategy;
 
+import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 
 @Component
@@ -29,13 +31,19 @@ public class ForkJoinPoolStrategy extends AbstractParseStrategy implements Parse
     }
 
     @Override
-    public void process(int size, Sheet sheet) {
-        forkJoinPool.invoke(new CatRecursiveAction(workloadAmount, sheet, 1, size, catRepository, catMapper));
+    public List<Cat> process(int size, Sheet sheet) {
+        return forkJoinPool.invoke(
+                new CatRecursiveAction(this, workloadAmount, sheet, 1, size, catRepository, catMapper)
+        );
     }
 
     @Override
     public boolean isAllowed() {
         return useForkJoinPool;
+    }
+
+    public List<Cat> callBatchProcess(Sheet sheet, int startIndex, int size) {
+        return processBatch(sheet, startIndex, size);
     }
 
 }

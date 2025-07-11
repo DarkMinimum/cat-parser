@@ -3,8 +3,8 @@ spring:
     name: cat-parser
   servlet:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+      max-file-size: 40MB
+      max-request-size: 40MB
   cassandra:
     schema-action: CREATE_IF_NOT_EXISTS
     request:
@@ -25,11 +25,11 @@ server:
 parallel-execution:
   fork-join:
     enabled: false
-    pools: 10
-    workload: 500
+    pools: 100
+    workload: 2000
   executor-service:
-    enabled: true
-    pools: 10
+    enabled: false
+    pools: 100
     virtual: true
 
 logging:

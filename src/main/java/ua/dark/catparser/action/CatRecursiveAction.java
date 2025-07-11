@@ -1,22 +1,23 @@
 package ua.dark.catparser.action;
 
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ua.dark.catparser.entity.Cat;
 import ua.dark.catparser.mapper.SimpleRowCatMapper;
 import ua.dark.catparser.repo.CatRepository;
+import ua.dark.catparser.strategy.impl.ForkJoinPoolStrategy;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ForkJoinTask;
-import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.RecursiveTask;
 
-public class CatRecursiveAction extends RecursiveAction {
+public class CatRecursiveAction extends RecursiveTask<List<Cat>> {
 
     private static final Logger LOG = LoggerFactory.getLogger(CatRecursiveAction.class);
 
+    private final ForkJoinPoolStrategy caller;
     private final int workload;
     private final int leftIndex;
     private final int rightIndex;
@@ -24,7 +25,8 @@ public class CatRecursiveAction extends RecursiveAction {
     private final SimpleRowCatMapper catMapper;
     private final Sheet sheet;
 
-    public CatRecursiveAction(int workload, Sheet sheet, int leftIndex, int rightIndex, CatRepository catRepository, SimpleRowCatMapper catMapper) {
+    public CatRecursiveAction(ForkJoinPoolStrategy caller, int workload, Sheet sheet, int leftIndex, int rightIndex, CatRepository catRepository, SimpleRowCatMapper catMapper) {
+        this.caller = caller;
         this.workload = workload;
         this.sheet = sheet;
         this.leftIndex = leftIndex;
@@ -34,30 +36,22 @@ public class CatRecursiveAction extends RecursiveAction {
     }
 
     @Override
-    protected void compute() {
+    protected List<Cat> compute() {
         if (rightIndex - leftIndex > workload) {
-            ForkJoinTask.invokeAll(createSubtasks());
+            return ForkJoinTask.invokeAll(createSubtasks()).stream()
+                    .map(ForkJoinTask::join)
+                    .flatMap(Collection::stream)
+                    .toList();
         } else {
-            processBatch(leftIndex, rightIndex);
+            return caller.callBatchProcess(sheet, leftIndex, rightIndex);
         }
     }
 
     private List<CatRecursiveAction> createSubtasks() {
         final int newIndex = leftIndex + (rightIndex - leftIndex) / 2;
         return List.of(
-                new CatRecursiveAction(workload, sheet, leftIndex, newIndex, catRepository, catMapper),
-                new CatRecursiveAction(workload, sheet, newIndex, rightIndex, catRepository, catMapper));
-    }
-
-    private void processBatch(int leftIndex, int rightIndex) {
-        List<Cat> catList = new ArrayList<>();
-        int offset = leftIndex;
-        while (offset < sheet.getLastRowNum() && offset <= rightIndex) {
-            Row row = sheet.getRow(offset);
-            catList.add(catMapper.rowToCat(row));
-            offset++;
-        }
-//        catRepository.saveAll(catList);
+                new CatRecursiveAction(caller, workload, sheet, leftIndex, newIndex, catRepository, catMapper),
+                new CatRecursiveAction(caller, workload, sheet, newIndex, rightIndex, catRepository, catMapper));
     }
 
 }

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import ua.dark.catparser.enums.StrategyType;
 import ua.dark.catparser.service.RawReader;
 
 @RestController
@@ -19,11 +20,16 @@ public class DataController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<String> loadData(@RequestParam("table") MultipartFile file) {
+    public ResponseEntity<String> loadData(@RequestParam("table") MultipartFile file,
+                                           @RequestParam(name="type", required = false) StrategyType strategyType) {
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body("Empty file");
         }
-        rawReader.processFile(file);
+        if (strategyType != null) {
+            rawReader.processFile(file, strategyType);
+        } else {
+            rawReader.processFile(file);
+        }
         return ResponseEntity.ok().body("Success");
     }
 }
